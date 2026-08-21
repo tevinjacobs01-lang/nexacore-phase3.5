@@ -1,0 +1,33 @@
+export interface Property {
+  id: string;
+  listing_reference?: string;
+  address?: string;
+  suburb?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
+  listing_type?: "sale" | "rent";
+  property_type?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  garages?: number;
+  floor_size_sqm?: number;
+  stand_size_sqm?: number;
+  asking_price?: number;
+  monthly_rental?: number;
+  listing_date?: string;
+  days_on_market?: number;
+  listing_source?: string;
+  listing_url?: string;
+  agent_name?: string;
+  contact_number?: string;
+  email?: string;
+  notes?: string;
+  contact_status: string;
+  lead_score: number;
+  follow_up_date?: string;
+  last_contacted_at?: string;
+  created_at: string;
+}

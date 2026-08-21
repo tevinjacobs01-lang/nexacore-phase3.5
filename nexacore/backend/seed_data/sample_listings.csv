@@ -1,0 +1,6 @@
+Listing Reference,Address,Suburb,City,Province,Postal Code,Sale or Rent,Property Type,Bedrooms,Bathrooms,Garages,Floor Size,Stand Size,Asking Price,Listing Date,Days on Market,Listing Source,Agent Name,Phone,Email
+REF-1001,12 Oak Street,Roodepoort,Johannesburg,Gauteng,1724,Sale,House,3,2,2,180,650,1850000,2026-05-01,97,Approved Feed A,Jane Smith,0821234567,jane@example.com
+REF-1002,45 Maple Ave,Fourways,Johannesburg,Gauteng,2191,Rent,Apartment,2,1,1,85,,14000,2026-07-10,27,Approved Feed A,John Doe,0839876543,john@example.com
+REF-1003,7 Birch Close,Roodepoort,Johannesburg,Gauteng,1724,Rent,Townhouse,3,2,1,120,,12500,2026-06-15,52,Approved Feed A,Jane Smith,0821234567,jane@example.com
+,88 Cedar Road,Sandton,Johannesburg,Gauteng,2196,Sale,House,4,3,2,310,900,4200000,2026-04-20,108,Approved Feed B,,,
+REF-1005,23 Pine Street,Roodepoort,Johannesburg,Gauteng,1724,Rent,Apartment,1,1,1,55,,13500,2026-07-25,12,Approved Feed A,Jane Smith,0821234567,jane@example.com
