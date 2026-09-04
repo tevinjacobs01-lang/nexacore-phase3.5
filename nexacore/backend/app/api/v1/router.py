@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth, properties, dashboard, imports, scoring, activities, notifications, ai, reports,
-    sources, scans, listings, leads, contacts,
+    sources, scans, listings, leads, contacts, leads_inbox,
     interactions, notes, attachments, tasks, follow_ups, appointments, templates,
 )
 
@@ -20,6 +20,11 @@ api_router.include_router(sources.router, prefix="/sources", tags=["sources"])
 api_router.include_router(scans.router, prefix="/scans", tags=["scans"])
 api_router.include_router(listings.router, prefix="/listings", tags=["listings"])
 api_router.include_router(leads.router, prefix="/leads", tags=["leads"])
+api_router.include_router(
+    leads_inbox.router,
+    prefix="/leads",
+    tags=["leads"]
+)
 api_router.include_router(contacts.router, prefix="/contacts", tags=["contacts"])
 api_router.include_router(interactions.router, prefix="/interactions", tags=["interactions"])
 api_router.include_router(notes.router, prefix="/notes", tags=["notes"])
