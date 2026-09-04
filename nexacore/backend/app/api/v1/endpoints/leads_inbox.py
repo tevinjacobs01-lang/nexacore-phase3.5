@@ -8,11 +8,35 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.contact import Contact
-from app.models.discovery_opportunity import DiscoveryOpportunity
+<<<<<<< HEAD
 from app.models.lead import Lead
 from app.models.property import Property
 from app.models.user import User
-from app.services.next_action import derive_next_action
+
+try:
+    from app.models.discovery_opportunity import DiscoveryOpportunity
+except ModuleNotFoundError:
+    DiscoveryOpportunity = None
+
+try:
+    from app.services.next_action import derive_next_action
+except ModuleNotFoundError:
+    derive_next_action = None
+=======
+from app.models.lead import Lead
+from app.models.property import Property
+from app.models.user import User
+
+try:
+    from app.models.discovery_opportunity import DiscoveryOpportunity
+except ModuleNotFoundError:
+    DiscoveryOpportunity = None
+
+try:
+    from app.services.next_action import derive_next_action
+except ModuleNotFoundError:
+    derive_next_action = None
+>>>>>>> 1d97f50 (Make leads inbox compatible with production master)
 
 router = APIRouter()
 
@@ -36,23 +60,77 @@ def leads_inbox(
     leads = lead_query.order_by(Lead.created_at.desc()).all()
     
     # Query unqualified Opportunities
-    opportunities = (
-        db.query(DiscoveryOpportunity)
-        .join(Property)
-        .filter(
-            DiscoveryOpportunity.qualification_status.in_(
-                ["unreviewed", "review_required"]
+<<<<<<< HEAD
+    opportunities = []
+    if DiscoveryOpportunity is not None:
+        opportunities = (
+            db.query(DiscoveryOpportunity)
+            .join(Property)
+            .filter(
+                DiscoveryOpportunity.qualification_status.in_(
+                    ["unreviewed", "review_required"]
+                )
             )
+            .order_by(DiscoveryOpportunity.created_at.desc())
+            .all()
         )
-        .order_by(DiscoveryOpportunity.created_at.desc())
-        .all()
-    )
+=======
+    opportunities = []
+    if DiscoveryOpportunity is not None:
+        opportunities = (
+            db.query(DiscoveryOpportunity)
+            .join(Property)
+            .filter(
+                DiscoveryOpportunity.qualification_status.in_(
+                    ["unreviewed", "review_required"]
+                )
+            )
+            .order_by(DiscoveryOpportunity.created_at.desc())
+            .all()
+        )
+>>>>>>> 1d97f50 (Make leads inbox compatible with production master)
     
     # Synthesize items
     items = []
     
     for lead in leads:
-        action = derive_next_action(db, lead)
+<<<<<<< HEAD
+        if derive_next_action is not None:
+            action = derive_next_action(db, lead)
+            next_action = {
+                "action_type": action.action_type,
+                "action_label": action.action_label,
+                "urgency": action.urgency,
+                "due_at": action.due_at,
+                "reason": action.reason,
+            }
+        else:
+            next_action = {
+                "action_type": "review_lead",
+                "action_label": "Review lead",
+                "urgency": "medium",
+                "due_at": None,
+                "reason": "Awaiting follow-up",
+            }
+=======
+        if derive_next_action is not None:
+            action = derive_next_action(db, lead)
+            next_action = {
+                "action_type": action.action_type,
+                "action_label": action.action_label,
+                "urgency": action.urgency,
+                "due_at": action.due_at,
+                "reason": action.reason,
+            }
+        else:
+            next_action = {
+                "action_type": "review_lead",
+                "action_label": "Review lead",
+                "urgency": "medium",
+                "due_at": None,
+                "reason": "Awaiting follow-up",
+            }
+>>>>>>> 1d97f50 (Make leads inbox compatible with production master)
         contact = db.query(Contact).filter(Contact.id == lead.contact_id).first()
         prop = db.query(Property).filter(Property.id == lead.property_id).first() if lead.property_id else None
         items.append({
@@ -65,13 +143,11 @@ def leads_inbox(
             "status": lead.status,
             "lead_score": lead.lead_score,
             "priority": lead.priority,
-            "next_action": {
-                "action_type": action.action_type,
-                "action_label": action.action_label,
-                "urgency": action.urgency,
-                "due_at": action.due_at,
-                "reason": action.reason,
-            },
+<<<<<<< HEAD
+            "next_action": next_action,
+=======
+            "next_action": next_action,
+>>>>>>> 1d97f50 (Make leads inbox compatible with production master)
             "workflow_action": "manage_pipeline",
         })
     
