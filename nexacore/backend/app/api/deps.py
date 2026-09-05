@@ -2,8 +2,10 @@
 Shared FastAPI dependencies: DB session and current-user auth.
 """
 import uuid
+import hashlib
+import logging
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -12,9 +14,31 @@ from app.db.session import get_db
 from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+logger = logging.getLogger(__name__)
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+def _auth_config_fingerprint() -> str:
+    from app.core.config import settings
+
+    return hashlib.sha256(settings.JWT_SECRET_KEY.encode()).hexdigest()[:12]
+
+
+def get_current_user(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User:
+    # Temporary production diagnostics: metadata only, never token/header data.
+    def reject(stage: str, **details: object):
+        logger.warning(
+            "auth_rejected stage=%s path=%s config_fingerprint=%s details=%s",
+            stage,
+            request.url.path,
+            _auth_config_fingerprint(),
+            details,
+        )
+        raise credentials_exception
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -22,16 +46,24 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     payload = decode_access_token(token)
     if payload is None or "sub" not in payload:
-        raise credentials_exception
+        return reject("jwt_decode", payload_present=payload is not None)
 
     try:
         user_id = uuid.UUID(payload["sub"])
     except (TypeError, ValueError):
-        raise credentials_exception
+        return reject("subject_uuid", subject_type=type(payload.get("sub")).__name__)
 
     user = db.query(User).filter(User.id == user_id).first()
-    if user is None or not user.is_active or user.approval_status != "approved" or not user.email_verified:
-        raise credentials_exception
+    if user is None:
+        return reject("user_lookup", user_found=False)
+    if not user.is_active or user.approval_status != "approved" or not user.email_verified:
+        return reject(
+            "user_status",
+            user_found=True,
+            is_active=user.is_active,
+            approval_status=user.approval_status,
+            email_verified=user.email_verified,
+        )
     return user
 
 
