@@ -7,19 +7,24 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-# Sprint 27 — full sales pipeline. This supersedes the simpler 8-stage set
-# from Phase 2 (new/contacted/responded/follow_up/appointment/converted/
-# not_interested/closed). Existing rows written under the old stage names
-# still work at the DB level (status is just a string column) — use
-# LEGACY_STATUS_MAP to migrate/interpret them under the new pipeline.
+
+# NexaCore Realty Intelligence pipeline
 LEAD_PIPELINE_STAGES = [
-    "new", "researching", "contacted", "responded", "qualified",
-    "follow_up", "appointment", "listing_opportunity", "mandate_agreement",
-    "won", "lost",
+    "new",
+    "researching",
+    "contacted",
+    "responded",
+    "qualified",
+    "follow_up",
+    "appointment",
+    "listing_opportunity",
+    "mandate_agreement",
+    "won",
+    "lost",
 ]
 
-# Maps Phase 2 stage names to their closest Sprint 27 equivalent, so old
-# data (or API clients still sending old values) keeps working.
+
+# Backwards compatibility with older NexaCore stages
 LEGACY_STATUS_MAP = {
     "converted": "won",
     "not_interested": "lost",
@@ -28,25 +33,107 @@ LEGACY_STATUS_MAP = {
 
 
 def resolve_stage(status: str) -> str:
-    """Returns the Sprint 27 stage for a given status string, translating
-    legacy Phase 2 values if needed. Unknown values pass through unchanged."""
     return LEGACY_STATUS_MAP.get(status, status)
 
 
+# Lead categories
+LEAD_TYPES = [
+    "seller",
+    "landlord",
+    "buyer",
+    "tenant",
+    "investor",
+]
+
+
+# Lead sources
+LEAD_SOURCES = [
+    "website",
+    "facebook",
+    "instagram",
+    "property_portal",
+    "referral",
+    "manual",
+    "discovery",
+]
+
+
 class Lead(Base):
-    """An actionable lead derived from a Listing (Property) + Contact pair."""
+    """
+    NexaCore Realty Intelligence Lead.
+
+    Contact is always required.
+    Property is optional because buyers and tenants
+    may not have a property yet.
+    """
+
     __tablename__ = "leads"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    property_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("properties.id"), nullable=False)
-    contact_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("contacts.id"))
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
 
-    status: Mapped[str] = mapped_column(String(30), default="new")
-    priority: Mapped[str] = mapped_column(String(20), default="medium")  # low | medium | high
-    assigned_agent_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
+    contact_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("contacts.id"),
+        nullable=False,
+    )
 
-    last_contacted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    next_follow_up: Mapped[date | None] = mapped_column(Date)
-    notes: Mapped[str | None] = mapped_column(Text)
+    property_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("properties.id"),
+        nullable=True,
+    )
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    lead_type: Mapped[str] = mapped_column(
+        String(30),
+        default="seller",
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String(50),
+        default="manual",
+        nullable=False,
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(30),
+        default="new",
+        nullable=False,
+    )
+
+    priority: Mapped[str] = mapped_column(
+        String(20),
+        default="medium",
+        nullable=False,
+    )
+
+    lead_score: Mapped[int] = mapped_column(
+        default=0,
+        nullable=False,
+    )
+
+    assigned_agent_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+    )
+
+    last_contacted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
+
+    next_follow_up: Mapped[date | None] = mapped_column(
+        Date
+    )
+
+    notes: Mapped[str | None] = mapped_column(
+        Text
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )

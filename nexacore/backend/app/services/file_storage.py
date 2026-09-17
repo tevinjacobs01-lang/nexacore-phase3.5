@@ -32,14 +32,18 @@ def save_file(file_bytes: bytes, original_filename: str) -> str:
 
 def read_file(storage_path: str) -> bytes:
     path = Path(storage_path)
+    storage_root = STORAGE_ROOT.resolve()
+    resolved_path = path.resolve()
     # Defensive: never read outside the storage root, even if a storage_path
     # were somehow tampered with before reaching here.
-    if STORAGE_ROOT not in path.resolve().parents and path.resolve() != STORAGE_ROOT:
+    if storage_root not in resolved_path.parents and resolved_path != storage_root:
         raise ValueError("Refusing to read a path outside the attachment storage root")
-    return path.read_bytes()
+    return resolved_path.read_bytes()
 
 
 def delete_file(storage_path: str) -> None:
     path = Path(storage_path)
-    if path.exists() and (STORAGE_ROOT in path.resolve().parents):
-        path.unlink()
+    storage_root = STORAGE_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_path.exists() and storage_root in resolved_path.parents:
+        resolved_path.unlink()

@@ -169,3 +169,13 @@ def validate_listing(listing) -> list[str]:
         problems.append("email is not a valid format")
 
     return problems
+
+
+def has_meaningful_property_intent(listing) -> bool:
+    """Allow sparse authorised captures when text/contact evidence is useful."""
+    def get(field):
+        return listing.get(field) if isinstance(listing, dict) else getattr(listing, field, None)
+
+    intent = get("property_intent") or get("notes") or get("description")
+    contact = get("contact_number") or get("email") or get("contact_name")
+    return bool(intent and (get("listing_type") in {"sale", "rent"} or contact))

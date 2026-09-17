@@ -4,6 +4,7 @@ from app.api.v1.endpoints import (
     auth, properties, dashboard, imports, scoring, activities, notifications, ai, reports,
     sources, scans, listings, leads, contacts, leads_inbox,
     interactions, notes, attachments, tasks, follow_ups, appointments, templates,
+    discovery, intakes, captures, communications, webhooks, users,
 )
 
 api_router = APIRouter()
@@ -33,3 +34,9 @@ api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 api_router.include_router(follow_ups.router, prefix="/follow-ups", tags=["follow-ups"])
 api_router.include_router(appointments.router, prefix="/appointments", tags=["appointments"])
 api_router.include_router(templates.router, prefix="/templates", tags=["templates"])
+api_router.include_router(discovery.router, prefix="/discovery", tags=["discovery"])
+api_router.include_router(intakes.router, prefix="/intakes", tags=["intakes"])
+api_router.include_router(captures.router, prefix="/captures", tags=["captures"])
+api_router.include_router(communications.router, prefix="/communications", tags=["communications"])
+api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
+api_router.include_router(users.router, prefix="/users", tags=["users"])

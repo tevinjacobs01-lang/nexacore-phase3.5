@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import String, Integer, Numeric, Date, DateTime, Text, func, Index
+from sqlalchemy import String, Integer, Numeric, Date, DateTime, Text, func, Index, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,6 +16,7 @@ class Property(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
     listing_reference: Mapped[str | None] = mapped_column(String(100), index=True)
 
     address: Mapped[str | None] = mapped_column(String(500))
@@ -27,6 +28,8 @@ class Property(Base):
     longitude: Mapped[float | None] = mapped_column(Numeric(9, 6))
 
     listing_type: Mapped[str | None] = mapped_column(String(20))  # "sale" | "rent"
+    seller_type: Mapped[str | None] = mapped_column(String(20))  # owner | agent | agency | developer | unknown
+    is_owner_listed: Mapped[bool | None] = mapped_column()
     property_type: Mapped[str | None] = mapped_column(String(100))  # house, apartment, etc.
     bedrooms: Mapped[int | None] = mapped_column(Integer)
     bathrooms: Mapped[int | None] = mapped_column(Integer)
