@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     # AI Assistant
     ANTHROPIC_API_KEY: str | None = None
     ANTHROPIC_MODEL: str = "claude-sonnet-4-6"
+    CAPTURE_OCR_PROVIDER: str = "tesseract"
 
     # Upload safety
     MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024
