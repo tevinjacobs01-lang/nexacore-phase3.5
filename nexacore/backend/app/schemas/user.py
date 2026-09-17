@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -14,6 +15,10 @@ class UserOut(BaseModel):
     full_name: str | None
     role: str
     is_active: bool
+    approval_status: str
+    email_verified: bool
+    approved_at: datetime | None = None
+    rejection_reason: str | None = None
 
     class Config:
         from_attributes = True
@@ -22,6 +27,21 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class RegistrationResponse(BaseModel):
+    user: UserOut
+    verification_token: str | None = None
+    message: str
+
+
+class EmailVerificationRequest(BaseModel):
+    token: str
+
+
+class UserApprovalRequest(BaseModel):
+    role: str = "agent"
+    reason: str | None = None
 
 
 class LoginRequest(BaseModel):
